@@ -1,6 +1,6 @@
 # Author:         Emily S Nightingale
 # Institutions:   London Schoool of Hygiene and Tropical Medicine, London, UK
-# Date Published: XX July 2019
+# Date Published: October 2019
 ################################################################################
 # Starting from a basic model with only an endemic linear trend (equal across 
 # all blocks), test possible additions to the model and select that which yields 
@@ -11,10 +11,10 @@
 ################################################################################
 
 # Location for saving output
-setwd("C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/final model selection")
+setwd("C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/Paper")
 
 set.seed(101)
-probs <- list(0.25,0.75)
+probs <- list(0.1,0.25,0.45,0.55,0.75,0.9)
 SCORES <- c("logs", "rps", "dss", "ses")
 
 # Run all models on a subset in order to later compare with up to 4th order lagged model.
@@ -40,17 +40,17 @@ m1 <- hhh4(stsobj, control=basic.control)
 # Double check suitability of NB versus Poisson
 mP <- update(m1, family="Poisson")
 
-# Compare temporal lags up to four months
-m1_ar <- update(m1, ar=list(~1))
-m1_arlag <- comp.arlag(m1,tp=test, type="first")
-save(m1_arlag, file = "./results/m1_arlag_osafirst.Rdata")
-plot.ar(m1_arlag, file = "m1_arcomp_osafirst")
-
-# Compare spatial lags
-m1_nb <- update(m2, ne=list(f = ~1, weights=neighbourhood(stsobj)==1))
-m1_nblag <- comp.nblag(m1_nb, test, type="first")
-save(m1_nblag, file = "./results/m1_nblag_osafirst.Rdata")
-plot.nb(m1_nblag, file = "m1_nbcomp_osafirst")
+# # Compare temporal lags up to four months
+# m1_ar <- update(m1, ar=list(~1))
+# m1_arlag <- comp.arlag(m1,tp=test, type="first")
+# save(m1_arlag, file = "./results/m1_arlag.Rdata")
+# plot.ar(m1_arlag, file = "./lagcomp_final/m1_arcomp")
+# 
+# # Compare spatial lags
+# m1_nb <- update(m2, ne=list(f = ~1, weights=neighbourhood(stsobj)==1))
+# m1_nblag <- comp.nblag(m1_nb, test, type="first")
+# save(m1_nblag, file = "./results/m1_nblag.Rdata")
+# plot.nb(m1_nblag, file = "./lagcomp_final/m1_nbcomp")
 
 
 #------------------------------------------------#
@@ -117,7 +117,7 @@ select1 <- modelassess(model.list1, test,type="first")
 # z 
 # 6.382924e-83 1.929108e+01 
 
-scores1 <- score_tidy(select1)
+# scores1 <- score_tidy(select1)
 
 # Plot PIT histograms for all potential models
 png(filename = "PIT_select1.png", height=700, width=1000)
@@ -159,15 +159,15 @@ permut.test(m1,m2,test, type="first")
 #  M3
 #------#
 
-# Test temporal and spatial lags in updated model
-m2_arlag <- comp.arlag(m2, tp=test, type="first")
-save(m2_arlag, file="./results/m2_arlag_osafirst.Rdata")
-plot.ar(m2_arlag, file="m2_arcomp_osafirst")
-
-m2_nb <- update(m2, ne=list(f=~1, weights=neighbourhood(stsobj)==1))
-m2_nblag <- comp.nblag(m2_nb,test,type="first")
-save(m2_nblag, file="./results/m2_nblag_osafirst.Rdata")
-plot.nb(m2_nblag, file="m2_nbcomp_osafirst")
+# # Test temporal and spatial lags in updated model
+# m2_arlag <- comp.arlag(m2, tp=test, type="first")
+# save(m2_arlag, file="./results/m2_arlag.Rdata")
+# plot.ar(m2_arlag, file="./lagcomp_final/m2_arcomp")
+# 
+# m2_nb <- update(m2, ne=list(f=~1, weights=neighbourhood(stsobj)==1))
+# m2_nblag <- comp.nblag(m2_nb,test,type="first")
+# save(m2_nblag, file="./results/m2_nblag.Rdata")
+# plot.nb(m2_nblag, file="./lagcomp_final/m2_nbcomp")
 
 
 m2a <- update(m2, end=list(f=addSeason2formula(~1, S=1, period=stsobj@freq)))
@@ -259,7 +259,7 @@ select2 <- modelassess(model.list2, test, type="first")
 # z 
 # 3.416377e-07 5.098897e+00 
 
-scores2 <- score_tidy(select2)
+# scores2 <- score_tidy(select2)
 
 png(filename = "PIT_select2.png", height=700, width=1000)
 par(mfrow=c(3,5))
@@ -300,20 +300,20 @@ permut.test(m2,m3,tp=test, type="first")
 #  M4
 #------#
 
-ctl.m3nb <- list(end = list(f = ~1+t, offset=population(stsobj)),
-                 ar = list(f = addSeason2formula(~1, S=1, period=stsobj@freq)),
-                 ne=list(f = ~1, weights=neighbourhood(stsobj)==1),
-                 max_lag = 2,
-                 subset = subset,
-                 family = "NegBin1")
-m3_nb <- profile_par_lag(stsobj,control=ctl.m3nb)
-m3_nblag <- comp.nblag(m3_nb, tp=test, type="first")
-save(m3_nblag, file="./results/m3_nblag_osafirst.Rdata")
-plot.nb(m3_nblag, file="m3_nbcomp_osafirst")
-
-m3_arlag <- comp.arlag(m2, tp=test, type="first")
-save(m3_arlag, file="./results/m3_arlag_osafirst.Rdata")
-plot.ar(m3_arlag, file="m3_arcomp_osafirst")
+# ctl.m3nb <- list(end = list(f = ~1+t, offset=population(stsobj)),
+#                  ar = list(f = addSeason2formula(~1, S=1, period=stsobj@freq)),
+#                  ne=list(f = ~1, weights=neighbourhood(stsobj)==1),
+#                  max_lag = 2,
+#                  subset = subset,
+#                  family = "NegBin1")
+# m3_nb <- profile_par_lag(stsobj,control=ctl.m3nb)
+# m3_nblag <- comp.nblag(m3_nb, tp=test, type="first")
+# save(m3_nblag, file="./results/m3_nblag.Rdata")
+# plot.nb(m3_nblag, file="./lagcomp_final/m3_nbcomp")
+# 
+# m3_arlag <- comp.arlag(m2, tp=test, type="first")
+# save(m3_arlag, file="./results/m3_arlag.Rdata")
+# plot.ar(m3_arlag, file="./lagcomp_final/m3_arcomp")
 
 c3a <- m3$control
 c3a$end <- list(f = addSeason2formula(~1, S=1, period=stsobj@freq))
@@ -407,7 +407,7 @@ select3<-modelassess(model.list3, test, type="first")
 # z 
 # 0.2227663 1.2192054 
 
-scores3 <- score_tidy(select3)
+# scores3 <- score_tidy(select3)
 
 png(filename="PIT_select3.png", height=700, width=1000)
 par(mfrow=c(3,5))
@@ -452,13 +452,13 @@ permut.test(m3, m4, tp=test, type="first")
 #  M5
 #------#
 
-m4_nblag <- comp.nblag(m4, tp=test, type="first")
-save(m4_nblag, file="./results/m4_nblag_osafirst.Rdata")
-plot.nb(m4_nblag, file="m4_nbcomp_osafirst")
-
-m4_arlag <- comp.arlag(m4, tp=test, type="first")
-save(m4_arlag, file="./results/m4_arlag_osafirst.Rdata")
-plot.ar(m4_arlag, file="m4_arcomp_osafirst")
+# m4_nblag <- comp.nblag(m4, tp=test, type="first")
+# save(m4_nblag, file="./results/m4_nblag.Rdata")
+# plot.nb(m4_nblag, file="./lagcomp_final/m4_nbcomp")
+# 
+# m4_arlag <- comp.arlag(m4, tp=test, type="first")
+# save(m4_arlag, file="./results/m4_arlag.Rdata")
+# plot.ar(m4_arlag, file="./lagcomp_final/m4_arcomp")
 
 # RPS and AIC worsen for spatial lags > 1 therefore adjust all
 # models in this stage to include only direct neighbours. 
@@ -562,7 +562,7 @@ select4 <- modelassess(model.list4, test, type="first")
 # z 
 # 0.3312366 0.9716260 
 
-scores4 <- score_tidy(select4)
+# scores4 <- score_tidy(select4)
 
 png(filename="PIT_select4.png", height=700, width=1000)
 (mfrow=c(4,5))
@@ -606,13 +606,13 @@ permut.test(m4,m5,tp=test, type="first")
 #  M6
 #------#
 
-m5_nblag <- comp.nblag(m5, tp=test, type="first")
-save(m5_nblag, file="./results/m5_nblag_osafirst.Rdata")
-plot.nb(m5_nblag, file="./figures/m5_nbcomp_osafirst")
-
-m5_arlag <- comp.arlag(m5, tp=test, type="first")
-save(m5_arlag, file="./results/m5_arlag_osafirst.Rdata")
-plot.ar(m5_arlag, file="./figures/m5_arcomp_osafirst")
+# m5_nblag <- comp.nblag(m5, tp=test, type="first")
+# save(m5_nblag, file="./results/m5_nblag.Rdata")
+# plot.nb(m5_nblag, file="./lagcomp_final/m5_nbcomp")
+# 
+# m5_arlag <- comp.arlag(m5, tp=test, type="first")
+# save(m5_arlag, file="./results/m5_arlag.Rdata")
+# plot.ar(m5_arlag, file="./lagcomp_final/m5_arcomp")
 
 c5a <- m5$control
 c5a$end <- list(f=addSeason2formula(~1, S=1, period=stsobj@freq))
@@ -699,10 +699,9 @@ select5 <- modelassess(model.list5, test, type="first")
 # z 
 # 0.5475247 0.6014735 
 
+# scores5 <- score_tidy(select5)
 
-scores5 <- score_tidy(select5)
-
-png(filename="./figures/PIT_select5.png", height=700, width=1000)
+png(filename="PIT_select5.png", height=700, width=1000)
 par(mfrow=c(3,4))
 for (m in model.list5){
   osa <- oneStepAhead_hhh4lag(m,tp=test,type="first",which.start = "current")
@@ -744,11 +743,7 @@ permut.test(m5,m6,tp=test, type="first")
 
 
 selected.models <- list(m1,m2,m3,m4,m5,m6)
-save(selected.models, file="./results/selected_models_osafirst.RData")
-
-# subset2<-13:72
-# mf_ar12 <- update(selected.models[[5]],max_lag=12, subset=subset2)
-# summary(mf_ar12)
+save(selected.models, file="./results/selected_models.RData")
 
 length(model.list1) #12
 length(model.list2) #14
@@ -757,41 +752,12 @@ length(model.list4) #13 -> model 8/13 is final model
 length(model.list5) #12 
 
 model.list.all <- c(model.list1,model.list2[-1], model.list3[-1], model.list4[-1],model.list5[-1])
-save(model.list.all, file="./results/models_osafirst.Rdata")
+save(model.list.all, file="./results/all_models.Rdata")
 
 # Model 42 is the final selected model.                 
 
 
 # Refit all models to just the training period (first four years of data)
 model.list.train <- lapply(model.list.all, update, subset=5:48)
-save(model.list.train, file="./results/models_trainper_osafirst.Rdata")
-
-
-# ------------------ #
-#   OSA Predictions
-# ------------------ #
-
-# Make OSA predictions based on rolling refitting and based on only the fit from the test period. 
-
-osa.final.first <- lapply(model.list.all,oneStepAhead_hhh4lag,tp=test,type="first",which.start="current",keep.estimates=T)
-osa.final.rolling <- lapply(model.list.all,oneStepAhead_hhh4lag,tp=test,type="rolling",which.start="current",keep.estimates=T)
-save(osa.final.first, file="./results/osa_first_osafirst.Rdata")
-save(osa.final.rolling, file="./results/osa_rolling_osafirst.Rdata")
-
-models.scores.first <- lapply(osa.final.first, scores, which = SCORES, individual = T)
-models.scores.rolling <- lapply(osa.final.rolling, scores, which = SCORES, individual = T)
-save(models.scores.first, file="./results/scores_first_osafirst.RData")
-save(models.scores.rolling, file="./results/scores_rolling_osafirst.RData")
-
-quants_OSAfirst <- lapply(osa.final.first,predquants,probs=list(0.1,0.25,0.45,0.55,0.75,0.9))
-save(quants_OSAfirst, file="./results/quants_osafirst.Rdata")
-
-
-# --------------- #
-#  UTILITY SCORE  #
-# --------------- #
-
-U.osafirst <- lapply(quants_OSAfirst, utility, cases[49:72,])
-save(U.osafirst, file="./results/U_osafirst.RData")
-
+save(model.list.train, file="./results/all_models_trainper.Rdata")
 

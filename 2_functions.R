@@ -1,6 +1,6 @@
 # Author:         Emily S Nightingale
 # Institutions:   London Schoool of Hygiene and Tropical Medicine, London, UK
-# Date Published: XX July 2019
+# Date Published: October 2019
 ################################################################################
 # User-defined functions required for model assessment, plotting and 
 # forecasting
@@ -13,18 +13,16 @@
 ################################################################################
 
 random.model<-function(sts.object, n, tp=c(48,71)){
-
-  cov<-sample(list(population(sts.object),logpopdens))
   
   seas1<-addSeason2formula(~1,S=1, period=sts.object@freq)
   seas1t<-addSeason2formula(~1+t,S=1, period=sts.object@freq)
-  seas1cov<-addSeason2formula(~1+cov,S=1, period=sts.object@freq)
-  seas1tcov<-addSeason2formula(~1+t+cov,S=1, period=sts.object@freq)
-  END.form.list<-list(~1,~1+t,~1+t+cov,~1+cov,seas1,seas1t,seas1cov,seas1tcov)
+  seas1cov<-addSeason2formula(~1+logpopdens,S=1, period=sts.object@freq)
+  seas1tcov<-addSeason2formula(~1+t+logpopdens,S=1, period=sts.object@freq)
+  END.form.list<-list(~1,~1+t,~1+t+logpopdens,~1+logpopdens,seas1,seas1t,seas1cov,seas1tcov)
   END.offset.list<-list(NULL,population(sts.object))
-  AR.form.list<-list(~1,~1+t,~1+t+cov,~1+cov,seas1,seas1t,seas1cov,seas1tcov)
+  AR.form.list<-list(~1,~1+t,~1+t+logpopdens,~1+logpopdens,seas1,seas1t,seas1cov,seas1tcov)
   AR.lag.list<-c(1:12)
-  NE.form.list<-list(~1,~1+t,~1+t+cov,~1+cov,seas1,seas1t,seas1cov,seas1tcov)
+  NE.form.list<-list(~1,~1+t,~1+t+logpopdens,~1+logpopdens,seas1,seas1t,seas1cov,seas1tcov)
   NE.lag.list<-c(1:7)  #using powerlaw syntax with maxlag=1 same as neighbourhood(sts.object)==1
   fam.list <- list("Poisson","NegBin1",as.factor(df_wide$State),as.factor(df_wide$District))
   
@@ -48,7 +46,7 @@ random.model<-function(sts.object, n, tp=c(48,71)){
     
     
     # print(paste0("END = ",END.form,", offset = ",END.offset,", AR = ",AR.form,", lag = ",AR.lag,", NE = ",NE.form,", sp.lag = ",NE.lag,", family = ",fam))
-
+    
     control <- list(end = list(f = END.form, offset=END.offset), 
                     ar = list(f = AR.form),
                     ne = list(f = NE.form, weights=W_powerlaw(maxlag = NE.lag)), #something wrong with this?
@@ -56,7 +54,7 @@ random.model<-function(sts.object, n, tp=c(48,71)){
                     max_lag=AR.lag,
                     family = fam)
     
-    # assign(paste("model",i, sep = ""),profile_par_lag(sts.object,control=c1))
+    # Fit models with error catching since some combinations lead to convergence issues
     model <- tryCatch(profile_par_lag(sts.object, control=control), error = function(e) e, warning = function(w) w) #, finally = function(){ models <- list.append(models, model) })
     osa1<-tryCatch(oneStepAhead_hhh4lag(model,tp=tp,type="first",which.start="current",keep.estimates=T), error = function(e) e, warning = function(w) w)
     osa2<-tryCatch(oneStepAhead_hhh4lag(model,tp=tp,type="rolling",which.start="current",keep.estimates=T), error = function(e) e, warning = function(w) w)
@@ -72,6 +70,7 @@ random.model<-function(sts.object, n, tp=c(48,71)){
   }
   return(list(models,osa.first,osa.roll))
 }
+
 
 ################################################################################
 # For 3_selection.R
@@ -192,37 +191,40 @@ plot.nb <- function(result,file){
 # updated parameter estimates).
 modelassess <- function(model.list, time.period,type,SCORES=c("logs", "rps", "dss", "ses")){
   
-  AIC <- sapply(model.list, AIC)
-  models.pred <- lapply(model.list, oneStepAhead_hhh4lag, tp = time.period, type = type, which.start = "current", keep.estimates=T)
-  # par(mfrow=c(2,2))
-  # for (m in models.pred){plot(c(cases),c(pred(m)))}
-  models.scores <- lapply(models.pred, scores, which = SCORES, individual = T)
-  print(t(sapply(models.scores, colMeans, dims=2)))
+  model.calibr <- vector(length=2)
   
-  models.calibr <- lapply(models.pred, calibrationTest, which = "rps", individual = T)
-  for (m in 1:length(model.list)){print(c(models.calibr[[m]]$p.value, models.calibr[[m]]$statistic))}
-
-  return(list(AIC,models.pred,models.scores, models.calibr))
+  AIC <- sapply(model.list, AIC)
+  model.preds <- lapply(model.list, oneStepAhead_hhh4lag, tp = time.period, 
+                        type = type, which.start = "current", 
+                        keep.estimates=T)
+  all.scores <- lapply(model.preds, scores, which = SCORES, individual = T)
+  all.calibr <- lapply(model.preds, calibrationTest, which = "rps", individual = T)
+  model.scores <- t(sapply(all.scores, colMeans, dims=2))
+  for (m in 1:length(model.list)){
+    model.calibr <- rbind(model.calibr,
+                          c(all.calibr[[m]]$p.value, all.calibr[[m]]$statistic))}
+  
+  model.calibr <- model.calibr[-1,]
+  return(list(AIC=AIC,pred=model.preds,scores=model.scores, calib=model.calibr))
 }
 
 # Calculate overall average scores for each model, across all blocks and predicted
 # time points
-score_tidy<-function(x){
-  nmod<-length(x[[3]])
-  avg.scores<-matrix(nrow=nmod,ncol=4)
-  for(i in 1:nmod){
-    avg.scores[i,]<-apply(x[[3]][[i]],MARGIN = 3, FUN="mean", na.rm=T)
-  }
-  colnames(avg.scores)<-c("logs","RPS","DSS","SES")
-  #print(avg.scores)
-  return(avg.scores)}
+# score_tidy<-function(x){
+#   nmod<-length(x[[3]])
+#   avg.scores<-matrix(nrow=nmod,ncol=4)
+#   for(i in 1:nmod){
+#     avg.scores[i,]<-apply(x[[3]][[i]],MARGIN = 3, FUN="mean", na.rm=T)
+#   }
+#   colnames(avg.scores)<-c("logs","RPS","DSS","SES")
+#   #print(avg.scores)
+#   return(avg.scores)}
 
 # Permuatation test of scores between models
 permut.test<-function(null.model,new.model, tp, type){
   
   SCORES <- c("logs", "rps", "dss", "ses")
   
-  set.seed(seed) 
   models2compare <- c('null.model', 'new.model')
   models.pred <- lapply(mget(models2compare), oneStepAhead_hhh4lag, tp = tp, type = type, which.start = "current", keep.estimates=T)
   models.scores <- lapply(models.pred, scores, which = SCORES, individual = T)
@@ -316,7 +318,7 @@ stepaheadN<-function(model,
 # Output from stepaheadN: list(preds,disp,prob,cprob)
 # Need pred mean and disp to specify the distribution and pull out quantile values
 
-predquants<-function(model,pred.output,probs=list(0.1,0.25,0.45,0.55,0.75,0.9)){
+predquants<-function(pred.output,probs=list(0.1,0.25,0.45,0.55,0.75,0.9)){
   
   if(class(pred.output) == "list"){
     mu<-pred.output[[1]]
@@ -326,8 +328,7 @@ predquants<-function(model,pred.output,probs=list(0.1,0.25,0.45,0.55,0.75,0.9)){
     disp<-exp(-pred.output$psi)
   }
   
-  if(model$control$family=="Poisson"){qs<-lapply(probs,FUN=qpois,lambda=mu)
-  }else{qs<-lapply(probs,FUN=qnbinom,size=1/disp,mu=mu)}
+  qs<-lapply(probs,FUN=qnbinom,size=1/disp,mu=mu)
   
   return(qs)
 }
@@ -345,9 +346,9 @@ predquants<-function(model,pred.output,probs=list(0.1,0.25,0.45,0.55,0.75,0.9)){
 
 
 #------------------------------------------------------------------------------#
-# Calculate proposed utility score over three quantile intervals output by 
+# Calculate empirical coverage probabilities over three quantile intervals output by 
 # predquants
-utility<-function(quants,obs){
+covprob<-function(quants,obs){
   
   score_array<-array(dim=c(dim(obs),3))
   score_qwd_array<-array(dim=c(dim(obs),3))
