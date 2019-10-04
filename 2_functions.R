@@ -237,6 +237,17 @@ print(permut.test)
 # return(permut.test.rps)
 }
 
+# Permutation test of scores at different time horizons
+permut.test2 <- function(null.scores,new.scores){
+  set.seed(101) 
+  models.scores<-list(null=null.scores,new=new.scores)
+  permut.test <- permutationTest(
+    models.scores$null,
+    models.scores$new,
+    nPermutation = 10000)
+  print(permut.test)
+}
+
 
 ################################################################################
 # For 4_evaluation.R
@@ -372,6 +383,21 @@ covprob<-function(quants,obs){
   
 } 
 
+tidy.quants <- function(quants){
+  t.pred <- nrow(quants[[1]])
+  nblock <- ncol(quants[[1]])
+  qsLow_final<-array(dim=c(3,t.pred,nblock))
+  qsHi_final<-array(dim=c(3,t.pred,nblock))
+  qsLow_final[1,,] <- quants[[1]]
+  qsHi_final[1,,] <- quants[[6]]
+  qsLow_final[2,,] <- quants[[2]]
+  qsHi_final[2,,] <- quants[[5]]
+  qsLow_final[3,,] <- quants[[3]]
+  qsHi_final[3,,] <- quants[[4]]
+  
+  qs_final<-list(qsLow_final,qsHi_final)  
+  return(qs_final)
+}
 
 ################################################################################
 # For 6_figures.R 
@@ -417,7 +443,7 @@ mapplot<-function(shapefile,data,value,legend_title,pal = "A"){
   plot.map <- ggplot(data = shp.df, aes(long, lat, group = group)) 
   plot.map <- plot.map + geom_polygon(aes(fill = value))
   plot.map <- plot.map + geom_path(colour = 'black')
-  plot.map <- plot.map + scale_fill_viridis_c(option = pal, name = legend_title) 
+  plot.map <- plot.map + scale_fill_viridis_c(option = pal, direction = -1, name = legend_title) 
   plot.map <- plot.map + coord_equal() + theme_map() #+ geom_text(data=shp.df, aes(x=long, y=lat, label=Block, group=Block), size=0.5)
   return(plot.map)
 

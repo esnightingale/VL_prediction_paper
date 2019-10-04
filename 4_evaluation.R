@@ -182,3 +182,39 @@ C.4ahd <- covprob(quants4_final, cases[52:72,])
 save(C.3ahd, file="C_3ahd.RData")
 save(C.4ahd, file="C_4ahd.RData")
 
+
+# Compare RPS of predictions 1/3/4 steps ahead (OSA calculated from rolling and "first"/training fit)
+mean(models.scores.first[[42]][,,2]) # 0.4201441
+mean(models.scores.rolling[[42]][,,2]) # 0.4197563
+mean(scores_3ahead_avg) # 0.4413778
+mean(scores_4ahead_avg) # 0.438052
+
+permut.test2(models.scores.first[[42]][-c(1,2),,2],scores_final_3ahead)
+# $`diffObs`
+# [1] -0.02444261
+# 
+# $pVal.permut
+# [1] 9.999e-05
+# 
+# $pVal.t
+# [1] 1.722715e-19
+permut.test2(models.scores.first[[42]][-c(1:3),,2],scores_final_4ahead)
+# $`diffObs`
+# [1] -0.0275056
+# 
+# $pVal.permut
+# [1] 9.999e-05
+# 
+# $pVal.t
+# [1] 8.024757e-17
+permut.test2(scores_final_3ahead[-1,],scores_final_4ahead)
+# $`diffObs`
+# [1] -0.004445747
+# 
+# $pVal.permut
+# [1] 0.02389761
+# 
+# $pVal.t
+# [1] 0.02258403
+
+

@@ -51,8 +51,13 @@ setwd("C:/Users/phpuenig/Dropbox/VL/Data")
 
 #---------------------------- DATA SET UP ------------------------------#
 
-# Load maps
+# Block map of India
 map<-readOGR(dsn = "TAHSILS_CENSUS_2001",layer = "TAHSILS_CENSUS_2001")
+#VL region of interest
+VL<-map[map$state == "BIHAR"|
+           (map$state == "JHARKHAND" & (map$district == "DUMKA" & !(map$admin3 %in% c("Jamtara","Kundahit","Narayanpur_D","Nala"))|
+                                          (map$district %in% c("GODDA","PAKAUR","SAHIBGANJ")))),]
+# Endemic region of Bihar and Jharkhand
 shp<-map[(map$state == "BIHAR" & !(map$district %in% c("GAYA","JAMUI","KAIMUR (BHABUA)","ROHTAS")))|
          (map$state == "JHARKHAND" & (map$district == "DUMKA" & !(map$admin3 %in% c("Jamtara","Kundahit","Narayanpur_D","Nala"))|
                                    (map$district %in% c("GODDA","PAKAUR","SAHIBGANJ")))),]
