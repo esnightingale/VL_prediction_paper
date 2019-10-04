@@ -68,8 +68,8 @@ mapplot(shapefile=VL, data=inc18mth, legend_title="Cases per 10,000", value = va
 dev.off()
 
 par(mfrow=c(1,1))
-png(filename="Fig2.png", height=450, width=600)
-#tiff(filename="Fig2.tif",height=4.5,width=6, units = "in", res = 300)
+png(filename="Fig2.png", height=300, width=400)
+#tiff(filename="Fig2.tif",height=4,width=5, units = "in", res = 300)
 barplot(rowSums(cases), xaxt="n", xlab="", ylab="No. reported cases", space=0)
 axis(1, at=yr-1, labels=timeall[yr], las=2 , cex.axis=0.8)
 dev.off()
