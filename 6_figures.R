@@ -281,6 +281,9 @@ dev.off()
 i <- i+1
 }
 
+################################################################################
+#                             SUPPLEMENTARY FIGURES                            #
+################################################################################
 
 # ------------------ DISTRICTS WITH HIGH ESTIMATED DISPERSION ----------------- #
 
@@ -288,13 +291,13 @@ agg.dist<-aggregate(df_wide[,5:76],by=list(df_wide$District),FUN="sum")
 odd.dists<-agg.dist[which(agg.dist$Group.1%in%c("AURANGABAD","BANKA","JEHANABAD","NAWADA")),]
 odd.dists.melt<-melt(odd.dists)
 
-png(filename = "FigS1.png", height=250,width=1000)
-#tiff(filename = "FigS1.tif", height=3,width=12, units = "in", res = 300)
+png(filename = "S1Fig.png", height=250,width=1000)
+#tiff(filename = "S1Fig.tif", height=3,width=12, units = "in", res = 300)
 ggplot(odd.dists.melt,aes(as.numeric(variable),value))+xlab("Month")+ylab("No. reported cases")+geom_line()+facet_grid(~ Group.1)+theme_bw()
 dev.off()
 
 
-# -------- PIT histograms adding lags to baseline, seasonal model ------------ #
+# -------- PIT histograms adding lags to a baseline, seasonal model ---------- #
 
 AIC_seas<-vector(length=12)
 BIC_seas<-vector(length=12)
@@ -302,8 +305,6 @@ scores_seas<-matrix(nrow=12,ncol=4)
 calibp_lag<-matrix(nrow=12,ncol=4)
 fits.seas<-list()
 preds.seas<-list()
-png(filename = "S2Fig.png", height = 400, width = 1000)
-par(mfrow = c(3,4))
 for (i in 1:12){
   ctl <- list(end = list(f = ~1, offset=population(stsobj)), 
               ar = list(f = addSeason2formula(~1+t,S=1,period=stsobj@freq)), 
@@ -313,7 +314,6 @@ for (i in 1:12){
               family = "NegBin1")
   mod<-profile_par_lag(stsobj,control=ctl)
   osa<-oneStepAhead_hhh4lag(mod, tp=c(48,65), type = "first", which.start = "current")
-  pit(osa)
   scores_seas[i,]<-colMeans(scores(osa,which=SCORES))
   calib<-calibrationTest(osa,which="rps", individual=T)
   calibp_lag[i,]<-calib[["p.value"]]
@@ -323,5 +323,28 @@ for (i in 1:12){
   fits.seas<-list.append(fits.seas,mod)
   preds.seas<-list.append(preds.seas,osa)
 }
+
+
+png(filename = "S2Fig.png", height = 500, width = 800)
+#tiff(filename = "S2Fig.tiff", height = 6, width = 10, units = "in", res = 300)
+par(mfrow = c(3,4))
+for (osa in preds.seas){
+  pit(osa, J = 50)
+}
 dev.off()
 
+
+rps <- ggplot(as.data.frame(scores_seas), aes(x=1:12,y=V2)) + 
+  geom_line() +
+  xlab("Number of lags") +
+  ylab("RPS") +
+  theme_classic()
+cal <- ggplot(as.data.frame(calibp_lag), aes(x=1:12,y=V2)) + 
+  geom_line() +
+  xlab("Number of lags") +
+  ylab("Calibration p-value") +
+  theme_classic()
+png(filename = "S2a.png", height = 300, width = 800)
+tiff(filename = "S2a.tiff", height = 3, width = 8, units = "in", res = 300)
+plot_grid(rps,cal, labels = c("A","B"))
+dev.off()
