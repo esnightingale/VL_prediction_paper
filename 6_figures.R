@@ -33,8 +33,9 @@ load(paste0(path,"./evaluation/scores_mf_rolling.RData"))
 load(paste0(path,"./evaluation/scores_3ahead_final.RData"))
 load(paste0(path,"./evaluation/scores_4ahead_final.RData"))
 
-results_random <- load("C:/Users/phpuenig/Dropbox/VL/Monthly prediction/surveillance forecasting/exploratory/random model draw/result_table_randmods30.RData")
-results_main <- load("C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/Paper/results/evaluation/result_table.Rdata")
+load("C:/Users/phpuenig/Dropbox/VL/Monthly prediction/surveillance forecasting/exploratory/random model draw/result_table_randmods30.RData")
+results_random <- result_table
+load("C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/Paper/results/evaluation/result_table.Rdata")
 
 setwd("C:/Users/phpuenig/Dropbox/VL/Monthly prediction/surveillance forecasting/Paper/figures")
 
@@ -106,43 +107,43 @@ dev.off()
 
 #----------------- SYSTEMATIC SELECTION ------------------------#
 
-results_main$highlight[results_main$selected==0] <- 16
-results_main$highlight[results_main$selected==1] <- 5
-results_main$highlight[c(1,58)] <- 16
-results_main$highlight[42] <- 8
-nmod <- nrow(results_main)
+result_table$highlight[result_table$selected==0] <- 16
+result_table$highlight[result_table$selected==1] <- 5
+result_table$highlight[c(1,58)] <- 16
+result_table$highlight[42] <- 8
+nmod <- nrow(result_table)
 
 palette(plasma(6))
 png(filename = "Fig4.png", width=600, height=500)
 #tiff(filename = "Fig4.tiff", height = 6.5, width = 7.5, units = "in", res = 300)
 par(mfrow=c(2,2), mar=c(4,4,3,4))
 
-plot(c(1:nmod), results_main$rps, 
+plot(c(1:nmod), result_table$rps, 
      main="RPS", ylab="", xlab="Model no.", cex=0.7,
-     pch=results_main$highlight, col=as.factor(results_main$stage))
+     pch=result_table$highlight, col=as.factor(result_table$stage))
 legend(x=30, y=0.65, legend=c("1","2","3","4 (final)"),
        title="Selected model",
        col=plasma(5)[1:4],
        pch=c(5,5,5,8),
        cex = 0.7,
        bty="n")
-plot(c(1:nmod), results_main$AIC_train, 
+plot(c(1:nmod), result_table$AIC_train, 
      main="AIC (training set)", ylab="", xlab="Model no.", cex=0.7, 
-     pch=results_main$highlight, col=as.factor(results_main$stage))
-plot(c(1:nmod), results_main$C2575, xlim=c(1,nmod), 
+     pch=result_table$highlight, col=as.factor(result_table$stage))
+plot(c(1:nmod), result_table$C2575, xlim=c(1,nmod), 
      main="Empirical coverage - 25-75%", ylab="", xlab="Model no.", 
-     pch=results_main$highlight, cex=0.7, 
-     col=as.factor(results_main$stage))
+     pch=result_table$highlight, cex=0.7, 
+     col=as.factor(result_table$stage))
 par(new = T)
-plot(c(1:nmod), results_main$C2575_qwd, xlim=c(1,nmod), axes=F, xlab=NA, ylab=NA, 
+plot(c(1:nmod), result_table$C2575_qwd, xlim=c(1,nmod), axes=F, xlab=NA, ylab=NA, 
      type="l", lty="dashed", col="darkgrey")
 axis(side = 4)
 mtext(side = 4, line = 2, 'Average interval width')
-plot(c(1:nmod), results_main$C1090, 
+plot(c(1:nmod), result_table$C1090, 
      main="Empirical coverage - 10-90%", ylab="", xlab="Model no.", cex=0.7,
-     pch=results_main$highlight,col=as.factor(results_main$stage))
+     pch=result_table$highlight,col=as.factor(result_table$stage))
 par(new = T)
-plot(c(1:nmod), results_main$C1090_qwd, xlim=c(1,nmod), axes=F, xlab=NA, ylab=NA,
+plot(c(1:nmod), result_table$C1090_qwd, xlim=c(1,nmod), axes=F, xlab=NA, ylab=NA,
      type="l", lty="dashed", col="darkgrey")
 axis(side = 4)
 mtext(side = 4, line = 2, 'Average interval width')
@@ -275,7 +276,8 @@ p1 <- quantplot(df.1ahd,"correct1","1-month-ahead",T)
 p2 <- quantplot(df.3ahd,"correct1","3-month-ahead",F)
 p3 <- quantplot(df.4ahd,"correct1","4-month-ahead",F)
 
-tiff(filename = paste0("./quant_plots/predwindow_1-4",examples[i],".png"), width=15, height=5, units = "in", res = 300)
+#png(filename = paste0("./predwindow_1-4",examples[i],".png"), width=1000, height=300)
+tiff(filename = paste0("./predwindow_1-4",examples[i],".tiff"), width=14, height=4, units = "in", res = 300)
 print(plot_grid(p1, p2, p3, ncol=3))
 dev.off()
 i <- i+1
@@ -347,4 +349,19 @@ cal <- ggplot(as.data.frame(calibp_lag), aes(x=1:12,y=V2)) +
 png(filename = "S2a.png", height = 300, width = 800)
 tiff(filename = "S2a.tiff", height = 3, width = 8, units = "in", res = 300)
 plot_grid(rps,cal, labels = c("A","B"))
+dev.off()
+
+odd.blk.id<-df.rps$id[df.rps$value>2.5]
+odd.blk<-which(df_wide$OBJECTID%in%odd.blk.id)
+png("S3Fig.png",height=600,width=900)
+#tiff(filename = "S3Fig.tiff", height = 6, width = 8, units = "in", res = 300)
+par(mfrow=c(2,3))
+ind<-1
+for (i in odd.blk){plot(c(1:72),cases[,i],type="l",
+                        xlab="",
+                        xaxt="n",
+                        ylab="No. reported cases",
+                        main=paste0(df_wide$Block[i]," (",round(df.rps$value[df.rps$id%in%odd.blk.id],2)[ind],")"))
+  axis(1, at=yr-1, labels=c(2013:2019), cex.axis=0.8)
+  ind<-ind+1}
 dev.off()
