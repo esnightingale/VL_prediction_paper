@@ -9,8 +9,8 @@ This directory contains an analysis of monthly, block-level VL case counts acros
 Prerequisites
 The analysis was done in RStudio Version 3.5.1 - https://www.rstudio.com/. The following packages are required: 
 
-surveillance, hhh4addon, dplyr, plyr, lubridate, data.table, ggplot2, reshape2, spdep, rgdal, maptools, rlist, 
-lattice, MASS, pracma, stringr, png, abind, ggrepel, cowplot, gridExtra, fanplot.
+surveillance, hhh4addon, dplyr, plyr, lubridate, ggplot2, reshape2, spdep, rgdal, maptools, rlist, 
+lattice, MASS, pracma, stringr, png, abind, ggrepel, cowplot, gridExtra, viridis.
 
 Dataset 
 Data are owned by the Indian government via the National Vector Borne Disease Control Programme and we do not 
