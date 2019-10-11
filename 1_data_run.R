@@ -71,6 +71,7 @@ nbOrd <- nbOrder(poly2adjmat(shp), maxlag = 7)
 
 # Load input data (month-aggregated case counts for each block)
 load("input_sim.RData")
+input <- input_sim
 # load("./KAMIS/Analysis data/archive/input_jan13dec18_1406.RData")
 
 # Run user-defined functions 
