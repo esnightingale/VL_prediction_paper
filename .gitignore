@@ -3,6 +3,5 @@
 *.png
 *.docx
 *.jpg
-*.Rdata
 *.Rhistory
 *.csv
