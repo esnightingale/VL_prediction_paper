@@ -10,8 +10,8 @@ library(ggplot2)
 library(ggrepel)
 library(viridis)
 
-source("C:/Users/phpuenig/Documents/VL/surveillance_modelling/1_data_run.R")
-source("C:/Users/phpuenig/Documents/VL/surveillance_modelling/plot_hhh4_amended.R")
+source("C:/Users/phpuenig/Documents/VL/VL_prediction_paper/1_data_run.R")
+source("C:/Users/phpuenig/Documents/VL/VL_prediction_paper/plot_hhh4_amended.R")
 
 set.seed(101)
 SCORES <- c("logs", "rps", "dss", "ses")
@@ -53,30 +53,30 @@ pops2 <- t(pops2[,-1:-4])
 inc18 <- data.frame(id=wide2$OBJECTID, value=colSums(cases2[61:72,])*1e4/colMeans(pops2[61:72,]))
 
 # Block-level incidence per 10,000 in 2018
-png(filename = "Fig1.png", height = 400, width = 600)
-#tiff(filename = "Fig1.tiff", height = 5, width = 7, units = "in", res = 300)
-mapplot(shapefile=VL, data=inc18, legend_title="Cases per 10,000", value = value, pal = "A") +
+#png(filename = "./png/Fig1.png", height = 400, width = 600)
+tiff(filename = "./tif/Fig1.tif", height = 5, width = 7, units = "in", res = 300)
+mapplot(shapefile=VL, data=inc18, legend_title="Cases per 10,000", value = value) +
   ggtitle("Block-level incidence per 10,000 in 2018", )
 dev.off()
 
 # Average monthly incidence per 10,000 in 2018
 inc18mth <- data.frame(id=wide2$OBJECTID, value=colMeans(cases2[61:72,]*1e4/pops2[61:72,]))
-png(filename = "Fig1a.png", height = 400, width = 600)
-#tiff(filename = "Fig1a.tiff", height = 5, width = 7, units = "in", res = 300)
-mapplot(shapefile=VL, data=inc18mth, legend_title="Cases per 10,000", value = value, pal = "A") +
-  ggtitle("Block-level, average monthly incidence per 10,000 over 2018")
+#png(filename = "./png/Fig1a.png", height = 400, width = 600)
+tiff(filename = "./tif/Fig1a.tif", height = 5, width = 7, units = "in", res = 300)
+mapplot(shapefile=VL, data=inc18mth, legend_title="Cases per 10,000", value = value) #+ 
+  #ggtitle("Block-level, average monthly incidence per 10,000 over 2018")
 dev.off()
 
 par(mfrow=c(1,1))
-png(filename="Fig2.png", height=300, width=400)
-#tiff(filename="Fig2.tif",height=4,width=5, units = "in", res = 300)
+#png(filename="./png/Fig2.png", height=300, width=400)
+tiff(filename="Fig2.tif",height=4,width=5, units = "in", res = 300)
 barplot(rowSums(cases), xaxt="n", xlab="", ylab="No. reported cases", space=0)
 axis(1, at=yr-1, labels=timeall[yr], las=2 , cex.axis=0.8)
 dev.off()
 
 blocktotal <- colSums(cases)
-png(filename="Fig2b.png", height=450, width=600)
-#tiff(filename = "Fig2b.tiff", height = 4.5, width = 6, units = "in", res = 300)
+#png(filename="./png/Fig2b.png", height=450, width=600)
+tiff(filename = "./tif/Fig2b.tif", height = 4.5, width = 6, units = "in", res = 300)
 hist(blocktotal, breaks=30, xlab="Total cases Jan 2013-Dec 2018", 
      main="Block-level distribution of cases over whole time period (N = 502)")
 dev.off()
@@ -100,8 +100,8 @@ firstvroll <- ggplot(results_random,aes(rps.first,rps.roll, col=k)) +
   ggtitle("Training period fit versus rolling updates") +
   scale_color_viridis_c(option = "C") 
 
-png(filename = "Fig3.png", height=400, width=800)
-#tiff(filename = "Fig3.tiff", height=5, width=10, units = "in", res=300)
+#png(filename = "./png/Fig3.png", height=400, width=800)
+tiff(filename = "./tif/Fig3.tif", height=5, width=10, units = "in", res=300)
 plot_grid(fitvfirst+geom_point(cex=3), firstvroll+geom_point(cex=3), labels=c("A", "B"), ncol = 2)
 dev.off()
 
@@ -114,8 +114,8 @@ result_table$highlight[42] <- 8
 nmod <- nrow(result_table)
 
 palette(plasma(6))
-png(filename = "Fig4.png", width=600, height=500)
-#tiff(filename = "Fig4.tiff", height = 6.5, width = 7.5, units = "in", res = 300)
+#png(filename = "./png/Fig4.png", width=600, height=500)
+tiff(filename = "./tif/Fig4.tif", height = 6.5, width = 7.5, units = "in", res = 300)
 par(mfrow=c(2,2), mar=c(4,4,3,4))
 
 plot(c(1:nmod), result_table$rps, 
@@ -130,7 +130,7 @@ legend(x=30, y=0.65, legend=c("1","2","3","4 (final)"),
 plot(c(1:nmod), result_table$AIC_train, 
      main="AIC (training set)", ylab="", xlab="Model no.", cex=0.7, 
      pch=result_table$highlight, col=as.factor(result_table$stage))
-plot(c(1:nmod), result_table$C2575, xlim=c(1,nmod), 
+plot(c(1:nmod), (1-result_table$C2575), xlim=c(1,nmod), 
      main="Empirical coverage - 25-75%", ylab="", xlab="Model no.", 
      pch=result_table$highlight, cex=0.7, 
      col=as.factor(result_table$stage))
@@ -139,7 +139,7 @@ plot(c(1:nmod), result_table$C2575_qwd, xlim=c(1,nmod), axes=F, xlab=NA, ylab=NA
      type="l", lty="dashed", col="darkgrey")
 axis(side = 4)
 mtext(side = 4, line = 2, 'Average interval width')
-plot(c(1:nmod), result_table$C1090, 
+plot(c(1:nmod), (1-result_table$C1090), 
      main="Empirical coverage - 10-90%", ylab="", xlab="Model no.", cex=0.7,
      pch=result_table$highlight,col=as.factor(result_table$stage))
 par(new = T)
@@ -151,8 +151,8 @@ dev.off()
 
 # PIT histograms for selected models
 selected <- c(1,6,23,33,42,52)
-png(filename ="Fig5.png", height=400, width=600)
-#tiff(filename = "Fig5.tiff", height = 6, width = 10, units = "in", res = 300)
+#png(filename ="./png/Fig5.png", height=400, width=600)
+tiff(filename = "./tif/Fig5.tif", height = 6, width = 10, units = "in", res = 300)
 par(mfrow=c(2,3))
 i <- 1
 for (m in selected){
@@ -179,8 +179,8 @@ coefs <- coefficients(m.final)
 log_ar <- coefs[1]+coefs[2]*sin(2*pi*t/12)+coefs[3]*cos(2*pi*t/12)
 log_ne <- coefs[4]+coefs[5]*sin(2*pi*t/12)+coefs[6]*cos(2*pi*t/12)
 
-png(filename = "Fig6.png", height=350, width=550)
-#tiff(filename = "Fig6.tiff", height = 5, width = 8, units = "in", res = 300)
+#png(filename = "./png/Fig6.png", height=350, width=550)
+tiff(filename = "./tif/Fig6.tif", height = 5, width = 8, units = "in", res = 300)
 par(mfrow = c(2,1), mar = c(3, 4, 2, 2))
 plot(t, exp(log_ar), type = "l", ylab = "AR component", xlab = "", xaxt = "n")
 #axis(1, at=yr-1, labels=timeall[yr], las=2 , cex.axis=0.8)
@@ -198,17 +198,17 @@ df_wide$Block[which(df_wide$OBJECTID%in%highinc)]
 blknames <- paste0(df_wide$Block[which(df_wide$OBJECTID%in%highinc)],
                  " (RPS = ",
                  round(df.rps$value[df.rps$id%in%highinc],2),")")
-png(filename = "Fig7.png", height=600, width=800)
-tiff(filename = "Fig7.tiff", height = 7, width = 9, units = "in", res = 300)
+#png(filename = "./png/Fig7.png", height=600, width=800)
+tiff(filename = "./tif/Fig7.tif", height = 7, width = 9, units = "in", res = 300)
 plot_hhh42(m.final, units=highinc, names=blknames, ylab="No. reported cases",
            col=c("forestgreen","skyblue", "orange"))
 dev.off()
 
-png(filename = "Fig8.png", height=400, width=550)
-tiff(filename = "Fig8.tiff", height = 5, width = 6.5, units = "in", res = 300)
+#png(filename = "./png/Fig8.png", height=400, width=550)
+tiff(filename = "./tif/Fig8.tif", height = 5, width = 6.5, units = "in", res = 300)
 hist(df.rps$value, breaks = 50, 
      xlab = "Average Ranked Probability Score (RPS)",
-     main = "Distribution of RPS across all blocks (n = 502)")
+     main = "") #Distribution of RPS across all blocks (n = 502)
 dev.off()
 
 
@@ -233,8 +233,8 @@ p2<-ggplot(data=comp.pred.window,aes(one.ahead.first,four.ahead)) +
   ylab("Four-months-ahead") + 
   geom_abline(intercept = 0, slope = 1)
 
-png(filename = "Fig9.png", height=300, width=600)
-#tiff(filename = "Fig9.tiff", height=5, width=10, units = "in", res = 300)
+#png(filename = "./png/Fig9.png", height=300, width=600)
+tiff(filename = "./tif/Fig9.tif", height=5, width=10, units = "in", res = 300)
 plot_grid(p1,p2,ncol=2, labels=c("A","B"))
 dev.off()
 
@@ -276,8 +276,8 @@ p1 <- quantplot(df.1ahd,"correct1","1-month-ahead",T)
 p2 <- quantplot(df.3ahd,"correct1","3-month-ahead",F)
 p3 <- quantplot(df.4ahd,"correct1","4-month-ahead",F)
 
-#png(filename = paste0("./predwindow_1-4",examples[i],".png"), width=1000, height=300)
-tiff(filename = paste0("./predwindow_1-4",examples[i],".tiff"), width=14, height=4, units = "in", res = 300)
+#png(filename = paste0("./png/predwindow_1-4",examples[i],".png"), width=1000, height=300)
+tiff(filename = paste0("./tif/predwindow_1-4",examples[i],".tif"), width=14, height=4, units = "in", res = 300)
 print(plot_grid(p1, p2, p3, ncol=3))
 dev.off()
 i <- i+1
@@ -293,42 +293,41 @@ agg.dist<-aggregate(df_wide[,5:76],by=list(df_wide$District),FUN="sum")
 odd.dists<-agg.dist[which(agg.dist$Group.1%in%c("AURANGABAD","BANKA","JEHANABAD","NAWADA")),]
 odd.dists.melt<-melt(odd.dists)
 
-png(filename = "S1Fig.png", height=250,width=1000)
-#tiff(filename = "S1Fig.tif", height=3,width=12, units = "in", res = 300)
+#png(filename = "./png/S1Fig.png", height=250,width=1000)
+tiff(filename = "./tif/S1Fig.tif", height=3,width=12, units = "in", res = 300)
 ggplot(odd.dists.melt,aes(as.numeric(variable),value))+xlab("Month")+ylab("No. reported cases")+geom_line()+facet_grid(~ Group.1)+theme_bw()
 dev.off()
 
 
 # -------- PIT histograms adding lags to a baseline, seasonal model ---------- #
 
-AIC_seas<-vector(length=12)
-BIC_seas<-vector(length=12)
-scores_seas<-matrix(nrow=12,ncol=4)
-calibp_lag<-matrix(nrow=12,ncol=4)
-fits.seas<-list()
-preds.seas<-list()
-for (i in 1:12){
-  ctl <- list(end = list(f = ~1, offset=population(stsobj)), 
-              ar = list(f = addSeason2formula(~1+t,S=1,period=stsobj@freq)), 
-              ne = list(f = addSeason2formula(~1+t,S=1,period=stsobj@freq), weights = neighbourhood(stsobj) == 1),
-              max_lag=i,
-              subset=13:72,
-              family = "NegBin1")
-  mod<-profile_par_lag(stsobj,control=ctl)
-  osa<-oneStepAhead_hhh4lag(mod, tp=c(48,65), type = "first", which.start = "current")
-  scores_seas[i,]<-colMeans(scores(osa,which=SCORES))
-  calib<-calibrationTest(osa,which="rps", individual=T)
-  calibp_lag[i,]<-calib[["p.value"]]
-  AIC_seas[i]<-AIC(mod)
-  BIC_seas[i]<-BIC(mod)
-  
-  fits.seas<-list.append(fits.seas,mod)
-  preds.seas<-list.append(preds.seas,osa)
-}
+# AIC_seas<-vector(length=12)
+# BIC_seas<-vector(length=12)
+# scores_seas<-matrix(nrow=12,ncol=4)
+# calibp_lag<-matrix(nrow=12,ncol=4)
+# fits.seas<-list()
+# preds.seas<-list()
+# for (i in 1:12){
+#   ctl <- list(end = list(f = ~1, offset=population(stsobj)), 
+#               ar = list(f = addSeason2formula(~1+t,S=1,period=stsobj@freq)), 
+#               ne = list(f = addSeason2formula(~1+t,S=1,period=stsobj@freq), weights = neighbourhood(stsobj) == 1),
+#               max_lag=i,
+#               subset=13:72,
+#               family = "NegBin1")
+#   mod<-profile_par_lag(stsobj,control=ctl)
+#   osa<-oneStepAhead_hhh4lag(mod, tp=c(48,65), type = "first", which.start = "current")
+#   scores_seas[i,]<-colMeans(scores(osa,which=SCORES))
+#   calib<-calibrationTest(osa,which="rps", individual=T)
+#   calibp_lag[i,]<-calib[["p.value"]]
+#   AIC_seas[i]<-AIC(mod)
+#   BIC_seas[i]<-BIC(mod)
+#   
+#   fits.seas<-list.append(fits.seas,mod)
+#   preds.seas<-list.append(preds.seas,osa)
+# }
 
-
-png(filename = "S2Fig.png", height = 500, width = 800)
-#tiff(filename = "S2Fig.tiff", height = 6, width = 10, units = "in", res = 300)
+#png(filename = "./png/S2Fig.png", height = 500, width = 800)
+tiff(filename = "./tif/S2Fig.tif", height = 6, width = 10, units = "in", res = 300)
 par(mfrow = c(3,4))
 for (osa in preds.seas){
   pit(osa, J = 50)
@@ -346,15 +345,15 @@ cal <- ggplot(as.data.frame(calibp_lag), aes(x=1:12,y=V2)) +
   xlab("Number of lags") +
   ylab("Calibration p-value") +
   theme_classic()
-png(filename = "S2a.png", height = 300, width = 800)
-tiff(filename = "S2a.tiff", height = 3, width = 8, units = "in", res = 300)
+#png(filename = "./png/S2a.png", height = 300, width = 800)
+tiff(filename = "./tif/S2a.tif", height = 3, width = 8, units = "in", res = 300)
 plot_grid(rps,cal, labels = c("A","B"))
 dev.off()
 
 odd.blk.id<-df.rps$id[df.rps$value>2.5]
 odd.blk<-which(df_wide$OBJECTID%in%odd.blk.id)
-png("S3Fig.png",height=600,width=900)
-#tiff(filename = "S3Fig.tiff", height = 6, width = 8, units = "in", res = 300)
+#png("./png/S3Fig.png",height=600,width=900)
+tiff(filename = "./tif/S3Fig.tif", height = 6, width = 8, units = "in", res = 300)
 par(mfrow=c(2,3))
 ind<-1
 for (i in odd.blk){plot(c(1:72),cases[,i],type="l",

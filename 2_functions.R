@@ -403,7 +403,7 @@ tidy.quants <- function(quants){
 # For 6_figures.R 
 # Plot continuous measure on region map 
 
-mapplot<-function(shapefile,data,value,legend_title,pal = "A"){
+mapplot<-function(shapefile,data,value,legend_title,pal = "A", direction = -1){
   
   theme_map <- function (base_size = 12, base_family = "") {
     theme_gray(base_size = base_size, base_family = base_family) %+replace% 
@@ -443,7 +443,7 @@ mapplot<-function(shapefile,data,value,legend_title,pal = "A"){
   plot.map <- ggplot(data = shp.df, aes(long, lat, group = group)) 
   plot.map <- plot.map + geom_polygon(aes(fill = value))
   plot.map <- plot.map + geom_path(colour = 'black')
-  plot.map <- plot.map + scale_fill_viridis_c(option = pal, direction = -1, name = legend_title) 
+  plot.map <- plot.map + scale_fill_viridis_c(option = pal, direction = direction, name = legend_title) 
   plot.map <- plot.map + coord_equal() + theme_map() #+ geom_text(data=shp.df, aes(x=long, y=lat, label=Block, group=Block), size=0.5)
   return(plot.map)
 
