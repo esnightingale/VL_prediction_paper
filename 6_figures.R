@@ -6,8 +6,6 @@
 ################################################################################
 ################################################################################
 
-library(ggplot2)
-library(ggrepel)
 library(viridis)
 
 source("C:/Users/phpuenig/Documents/VL/VL_prediction_paper/1_data_run.R")

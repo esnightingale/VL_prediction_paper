@@ -7,15 +7,9 @@
 # It reads in block-level shapefiles and a long format input file which contains 
 # pre-aggregated case counts and population estimates for each block in the 
 # region of interest and each month between January 2013 and December 2018.
-# Primary outputs are three sts objects for use with the functions in the 
-# surveillance package:
-#  a) stsobj1 - excludes all zero-count blocks and blocks which become 
-#               disconnected by exclusion of zero-count blocks. This is used
-#               for preliminary analyses in "a2_correlation.R" to investigate 
-#               the extent of spatial and temporal correlation.
-#  b) stsobj  - Primary object used in the main analysis.
-#  c) stsobj2 - Includes dummy rows to allow forecasting ahead of the observed 
-#               data.
+# Primary output is an sts object, for use with the functions in the 
+# surveillance package.
+
 ################################################################################
 ################################################################################
 
@@ -29,7 +23,6 @@ library(tidyr)
 library(lubridate)
 library(ggplot2)
 library(maptools)
-library(data.table)
 library(rgdal)
 library(spdep)
 library(pracma)
@@ -44,7 +37,6 @@ library(MASS)
 library(ggrepel)
 library(cowplot)
 library(gridExtra)
-library(fanplot)
 library(reshape2)
 
 data.path <- "C:/Users/phpuenig/Dropbox/VL/Data/"
