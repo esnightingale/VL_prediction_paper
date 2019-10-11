@@ -21,16 +21,9 @@ The following files
 	1. Code scripts used to run the analysis and generate results
 		a) 1_data_run.R - Load data and set up R objects for analysis 
 		b) 2_functions.R - Run user-defined functions for model assessment, plotting and forecasting
-    c) 3_random_model_draw.R - Generate and evaluate random set of models as described in manuscript
-		c) 4_selection.R - Systematic selection process (by ranked probability score) over possible model structures within the surveillance                        framework
+                c) 3_random_model_draw.R - Generate and evaluate random set of models as described in manuscript
+		c) 4_selection.R - Systematic selection process (by ranked probability score) over possible model structures within the                                    surveillance framework
 		d) 5_evaluation.R - Calculate alternative fit and prediction metrics for all models fit during selection
 		e) 6_figures - Produce figures included in manuscript.
 		f) plot_hhh4_amended.R - A variation of the automatic plot for hhh4 objects which is included in surveillance
 
-	2. Variable codebook - describing variables contained in the dataset including data types and value labels
-
-Running the main code
-Step 1:
-Download the files into your designated folder
-
-Step 2:
