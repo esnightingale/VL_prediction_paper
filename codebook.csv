@@ -1,0 +1,20 @@
+Variable,Type,Description
+state,chr,shapefile attribute variable
+district,chr,shapefile attribute variable
+admin3,factor,shapefile attribute variable
+OBJECTID,factor,shapefile attribute variable
+level ,factor,shapefile attribute variable
+Shape_length,num,shapefile attribute variable
+Shape_Area,num,shapefile attribute variable
+State,factor,KAMIS resident state
+District,chr,KAMIS resident district
+Block,chr,KAMIS resident block
+DecadalGR,num,Estimated decadal block population growth rate
+AnnualGR,num,Estimated annual block population growth rate
+Pop11,int,Block population according to census February 2011
+interval_start,POSIXct,Diagnosis month start 
+count,num,Number of cases diagnosed in month starting interval_start
+pop,num,"Projected population in month starting interval_start, according to census and estimated growth."
+block_id,num,Numeric block ID (incl. non-endemic districts; 1:566)
+period_id,,Numeric month ID (1:72)
+interval_end,,Diagnosis month end
