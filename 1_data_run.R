@@ -47,12 +47,15 @@ library(gridExtra)
 library(fanplot)
 library(reshape2)
 
-setwd("C:/Users/phpuenig/Dropbox/VL/Data")
+data.path <- "C:/Users/phpuenig/Dropbox/VL/Data/"
+script.path <- "C:/Users/phpuenig/Documents/VL/VL_prediction_paper/"
 
 #---------------------------- DATA SET UP ------------------------------#
 
+setwd(data.path)
+
 # Block map of India
-map<-readOGR(dsn = "TAHSILS_CENSUS_2001",layer = "TAHSILS_CENSUS_2001")
+map<-readOGR(dsn = "TAHSILS_CENSUS_2001", layer = "TAHSILS_CENSUS_2001")
 #VL region of interest
 VL<-map[map$state == "BIHAR"|
            (map$state == "JHARKHAND" & (map$district == "DUMKA" & !(map$admin3 %in% c("Jamtara","Kundahit","Narayanpur_D","Nala"))|
@@ -67,10 +70,11 @@ shp@data$OBJECTID <- rownames(shp@data)
 nbOrd <- nbOrder(poly2adjmat(shp), maxlag = 7)
 
 # Load input data (month-aggregated case counts for each block)
-load("./KAMIS/Analysis data/archive/input_jan13dec18_1406.RData")
+load("input_sim.RData")
+# load("./KAMIS/Analysis data/archive/input_jan13dec18_1406.RData")
 
 # Run user-defined functions 
-source("C:/Users/phpuenig/Documents/VL/surveillance_modelling/2_functions.R")
+source(paste0(script.path,"2_functions.R"))
 
 #-----------------------------------------------------------------------#
 
