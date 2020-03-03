@@ -11,7 +11,7 @@
 ################################################################################
 
 # Location for saving output
-setwd("C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/Paper")
+setwd("C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/Paper/Update Feb 2020")
 
 set.seed(101)
 probs <- list(0.1,0.25,0.45,0.55,0.75,0.9)
@@ -61,6 +61,7 @@ mP <- update(m1, family="Poisson")
 m1a <- update(m1, end=list(f=addSeason2formula(~1+t, S=1, period=stsobj@freq), offset=population(stsobj)))
 m1a2 <- update(m1, end=list(f=~1, offset=population(stsobj)))
 m1a3 <- update(m1, end=list(f=~1+t+logpopdens, offset=1))
+#m1a4 <- update(m1, end=list(f=~-1+ri(type="iid",corr="all") + t, offset=population(stsobj)))
 m1b <- update(m1, ar=list(f=~1, lag=1)) 
 m1b2 <- update(m1, ar=list(f=addSeason2formula(~1, S=1, period=stsobj@freq), lag=1))
 m1b3 <- update(m1, ar=list(f=addSeason2formula(~1+t, S=1, period=stsobj@freq), lag=1))
@@ -80,48 +81,36 @@ model.list1 <- list(m1,m1a,m1a2,m1a3,m1b,m1b2,m1b3,m1c,m1c2,m1c3,m1c4,m1d)
 save(model.list1, file="./results/modellist1.Rdata")
 
 select1 <- modelassess(model.list1, test,type="first")
-# logs       rps      dss      ses
-# [1,] 1.208445 0.6569231 2.644396 3.263767
-# [2,] 1.203510 0.6540003 2.542672 3.249254
-# [3,] 1.226083 0.6978473 2.373225 3.873827
-# [4,] 1.209090 0.6617311 2.403268 3.250645
-# [5,] 1.039168 0.4950514 1.034439 1.883609
-# [6,] 1.037969 0.4933758 1.031731 1.864375 ***
-# [7,] 1.038272 0.4960356 1.000509 1.883507
-# [8,] 1.023068 0.5155403 1.344840 2.307995
-# [9,] 1.023272 0.5156969 1.350205 2.309949
-# [10,] 1.022030 0.5146495 1.346082 2.293508
-# [11,] 1.021963 0.5156422 1.273479 2.301376
-# [12,] 1.205094 0.6591315 2.526938 3.266119
-# z 
-# 4.310509e-75 1.833550e+01 
-# z 
-# 3.297320e-57 1.594087e+01 
-# z 
-# 1.386028e-57 -1.599494e+01 
-# z 
-# 3.543340e-59 1.622169e+01 
-# z 
-# 0.1364016 1.4893256 
-# z 
-# 0.1444309 1.4594880 
-# z 
-# 0.0004326095 3.5193475732 
-# z 
-# 0.002699159 -3.000071852 
-# z 
-# 0.00151371 -3.17204229 
-# z 
-# 0.0009712016 -3.2987390026 
-# z 
-# 0.2009203 -1.2789340 
-# z 
-# 6.382924e-83 1.929108e+01 
-
-# scores1 <- score_tidy(select1)
+# logs       rps       dss      ses
+# [1,] 1.0358770 0.5184459 1.6291180 2.130660
+# [2,] 1.0357359 0.5203405 1.6019990 2.167662
+# [3,] 1.0680339 0.5557208 1.8464494 2.538001
+# [4,] 1.0360167 0.5138158 1.6137533 2.001474
+# [5,] 0.8994304 0.3942428 0.6662472 1.178399
+# [6,] 0.8984016 0.3932880 0.6594076 1.170417 ***
+# [7,] 0.8985644 0.3934164 0.6615115 1.171987
+# [8,] 0.8655831 0.3989603 0.3124655 1.381618
+# [9,] 0.8658444 0.3991505 0.3136781 1.383134
+# [10,] 0.8644340 0.3985060 0.3015828 1.377825
+# [11,] 0.8650074 0.3989618 0.3094265 1.382170
+# [12,] 1.0333091 0.5149617 1.5278215 2.062423
+# z
+# 8.205880e-20  -9.110426
+# 9.469711e-32 -11.725182
+# 5.255644e-89 -20.002332
+# 1.306193e-18  -8.805200
+# 3.400456e-03  -2.929008
+# 1.374684e-03  -3.199914 ***
+# 1.197808e-03  -3.239402
+# 4.632336e-12  -6.916410
+# 1.375306e-12  -7.086516
+# 8.121463e-13  -7.159090
+# 8.552307e-11  -6.490551
+# 1.956467e-07  -5.203427
+save(select1, file = "./results/select1.rdata")
 
 # Plot PIT histograms for all potential models
-png(filename = "PIT_select1.png", height=700, width=1000)
+png(filename = "./figures/PIT_select1.png", height=700, width=1000)
 par(mfrow=c(3,5))
 for (m in model.list1){
   osa <- oneStepAhead_hhh4lag(m, tp=test, type="first", which.start = "current")
@@ -133,28 +122,27 @@ dev.off()
 m2 <- m1b2
 summary(m2, idx2Exp=T)
 # Coefficients:
-# Estimate   Std. Error
-# exp(ar.1)                   6.685e-01  8.699e-03 
-# exp(ar.sin(2 * pi * t/12))  1.161e+00  2.002e-02 
-# exp(ar.cos(2 * pi * t/12))  1.028e+00  1.831e-02 
-# exp(end.1)                  2.610e+02  7.461e+00 
-# exp(end.t)                  9.908e-01  6.704e-04 
-# overdisp                    7.408e-01  1.726e-02 
+#   Estimate   Std. Error
+# exp(ar.1)                   6.107e-01  8.879e-03 
+# exp(ar.sin(2 * pi * t/12))  1.202e+00  2.318e-02 
+# exp(ar.cos(2 * pi * t/12))  1.023e+00  2.030e-02 
+# exp(end.1)                  2.709e+02  7.601e+00 
+# exp(end.t)                  9.874e-01  6.713e-04 
+# overdisp                    7.625e-01  1.936e-02 
 # 
-# Log-likelihood:   -41009.4 
-# AIC:              82030.8 
-# BIC:              82081.43 
+# Log-likelihood:   -36884.08 
+# AIC:              73780.15 
+# BIC:              73830.65 
 # 
-# Number of units:        502 
+# Number of units:        491 
 # Number of time points:  68 
 
 # Permutation test of improvement in scores (focus on RPS)
 permut.test(m1,m2,test, type="first")
 # logs          rps           dss          ses         
-# diffObs     0.1704754     0.1635473     1.612665     1.399392    
+# diffObs     0.1374754     0.1251579     0.9697104    0.9602424   
 # pVal.permut 9.999e-05     9.999e-05     9.999e-05    9.999e-05   
-# pVal.t      1.749376e-121 1.524884e-109 6.818378e-16 7.519585e-38
-
+# pVal.t      4.027568e-158 2.695568e-132 2.290022e-58 1.350163e-52
 
 #------#
 #  M3
@@ -163,33 +151,34 @@ permut.test(m1,m2,test, type="first")
 # # Test temporal and spatial lags in updated model
 # m2_arlag <- comp.arlag(m2, tp=test, type="first")
 # save(m2_arlag, file="./results/m2_arlag.Rdata")
-# plot.ar(m2_arlag, file="./lagcomp_final/m2_arcomp")
-# 
+# plot.ar(m2_arlag, file="./figures/m2_arcomp")
+
 # m2_nb <- update(m2, ne=list(f=~1, weights=neighbourhood(stsobj)==1))
+# m2_nb$control$max_lag <- 1
 # m2_nblag <- comp.nblag(m2_nb,test,type="first")
 # save(m2_nblag, file="./results/m2_nblag.Rdata")
-# plot.nb(m2_nblag, file="./lagcomp_final/m2_nbcomp")
+# plot.nb(m2_nblag, file="./figures/m2_nbcomp")
 
 
-m2a <- update(m2, end=list(f=addSeason2formula(~1, S=1, period=stsobj@freq)))
+m2a <- update(m2, end=list(f=addSeason2formula(~1 + t, S=1, period=stsobj@freq)))
 m2a2 <- update(m2, end=list(f = ~1, offset=population(stsobj)))
 m2a3 <- update(m2, end=list(f = ~1+logpopdens, offset=1))
-#m2a4 <- update(m2, end=list(f=~-1+ri(type="iid",corr="all"), offset=population(stsobj)))
+# m2a3 <- update(m2, end=list(f=~-1+ri(type="iid",corr="all") + t, offset=population(stsobj)))
 #[5,] 0.9828792 0.4863920 0.2442499 1.908734
 #                        z 
 #3.813094e-37 -1.273429e+01
 
-m2b <- update(m2, ar=list(f=addSeason2formula(~1+t, S=1, period=stsobj@freq)))
+m2b <- update(m2, ar=list(f=addSeason2formula(~1, S=2, period=stsobj@freq)))
 m2b2 <- update(m2, ar=list(f=addSeason2formula(~1+t, S=2, period=stsobj@freq)))
 #m2b3 <- update(m2, ar=list(f=addSeason2formula(~-1+ri(type="iid",corr="all"), S=1, period=stsobj@freq)))
 #[8,] 1.0357375 0.4862850 1.0091507 1.969483
 #                      z 
 #0.002846629 2.983832166 
 
-m2c <- update(m2, ne=list(f=~1, weights=W_powerlaw(maxlag = 2)))
-m2c2 <- update(m2, ne=list(f=addSeason2formula(~1, S=1, period=stsobj@freq), weights=W_powerlaw(maxlag = 2)))
-m2c3 <- update(m2, ne=list(f=addSeason2formula(~1+t, S=1, period=stsobj@freq), weights=W_powerlaw(maxlag = 2)))
-m2c4 <- update(m2, ne=list(f=~-1+logpopdens, weights=W_powerlaw(maxlag = 2)))
+m2c <- update(m2, ne=list(f=~1, weights=W_powerlaw(maxlag = 3)))
+m2c2 <- update(m2, ne=list(f=addSeason2formula(~1, S=1, period=stsobj@freq), weights=W_powerlaw(maxlag = 3)))
+m2c3 <- update(m2, ne=list(f=addSeason2formula(~1, S=2, period=stsobj@freq), weights=W_powerlaw(maxlag = 3)))
+m2c4 <- update(m2, ne=list(f=~-1+logpopdens, weights=W_powerlaw(maxlag = 3)))
 
 m2d <- update(m2, family=as.factor(df_wide$State))
 
@@ -216,6 +205,8 @@ model.list2 <- list(m2,m2a,m2a2,m2a3,m2b,m2b2,m2c,m2c2,m2c3,m2c4,m2d,m2e,m2f,m2g
 save(model.list2, file="./results/modellist2.Rdata")
 
 select2 <- modelassess(model.list2, test, type="first")
+select2[[3]]
+select2[[4]]
 # logs       rps       dss      ses
 # [1,] 1.0379691 0.4933758 1.0317307 1.864375
 # [2,] 1.0470322 0.5022538 0.9886852 1.911420
@@ -260,9 +251,11 @@ select2 <- modelassess(model.list2, test, type="first")
 # z 
 # 3.416377e-07 5.098897e+00 
 
-# scores2 <- score_tidy(select2)
+which.min(select2[[3]][,2])
+# since all calib tests significant, just choose best RPS
+# RPS should optimise sharpness and calibration, so none of these models are well calibrated yet?
 
-png(filename = "PIT_select2.png", height=700, width=1000)
+png(filename = "./figures/PIT_select2.png", height=700, width=1000)
 par(mfrow=c(3,5))
 for (m in model.list2){
   osa <- oneStepAhead_hhh4lag(m, tp=test, type="first", which.start = "current")
@@ -301,41 +294,41 @@ permut.test(m2,m3,tp=test, type="first")
 #  M4
 #------#
 
-# ctl.m3nb <- list(end = list(f = ~1+t, offset=population(stsobj)),
-#                  ar = list(f = addSeason2formula(~1, S=1, period=stsobj@freq)),
-#                  ne=list(f = ~1, weights=neighbourhood(stsobj)==1),
-#                  max_lag = 2,
-#                  subset = subset,
-#                  family = "NegBin1")
-# m3_nb <- profile_par_lag(stsobj,control=ctl.m3nb)
-# m3_nblag <- comp.nblag(m3_nb, tp=test, type="first")
-# save(m3_nblag, file="./results/m3_nblag.Rdata")
-# plot.nb(m3_nblag, file="./lagcomp_final/m3_nbcomp")
-# 
-# m3_arlag <- comp.arlag(m2, tp=test, type="first")
-# save(m3_arlag, file="./results/m3_arlag.Rdata")
-# plot.ar(m3_arlag, file="./lagcomp_final/m3_arcomp")
+ctl.m3nb <- list(end = list(f = ~1+t, offset=population(stsobj)),
+                 ar = list(f = addSeason2formula(~1, S=1, period=stsobj@freq)),
+                 ne=list(f = ~1, weights=neighbourhood(stsobj)==1),
+                 max_lag = 4,
+                 subset = subset,
+                 family = "NegBin1")
+m3_nb <- profile_par_lag(stsobj,control=ctl.m3nb)
+m3_nblag <- comp.nblag(m3_nb, tp=test, type="first")
+save(m3_nblag, file="./results/m3_nblag.Rdata")
+plot.nb(m3_nblag, file="./figures/m3_nbcomp")
+
+m3_arlag <- comp.arlag(m2, tp=test, type="first")
+save(m3_arlag, file="./results/m3_arlag.Rdata")
+plot.ar(m3_arlag, file="./figures/m3_arcomp")
 
 c3a <- m3$control
-c3a$end <- list(f = addSeason2formula(~1, S=1, period=stsobj@freq))
+c3a$end <- list(f = addSeason2formula(~1 + t, S=1, period=stsobj@freq))
 c3a2 <- m3$control
 c3a2$end <- list(f = ~1, offset=population(stsobj))
 c3a3 <- m3$control
-c3a3$end <- list(f = ~1+logpopdens, offset=1)
-c3a4 <- m3$control
-c3a4$end <- list(f = ~-1 + ri(type="iid",corr="all"), offset=population(stsobj))
+c3a3$end <- list(f = ~1+ t + logpopdens, offset=1)
+# c3a4 <- m3$control
+# c3a4$end <- list(f = ~-1 + ri(type="iid",corr="all"), offset=population(stsobj))
 #[1,] 0.9641210 0.4657732 0.1876271 1.764208
 # z 
 # 1.022487e-36 -1.265707e+01 
 
 c3b <- m3$control
-c3b$ar <- list(f=addSeason2formula(~1+t, S=1, period=stsobj@freq))
+c3b$ar <- list(f=addSeason2formula(~1, S=2, period=stsobj@freq))
 c3b2 <- m3$control
 c3b2$ar <- list(f=addSeason2formula(~1+t, S=2, period=stsobj@freq))
-c3b3 <- m3$control
-c3b3$max_lag <- 3
-c3b4 <- m3$control
-c3b4$ar <- list(f=addSeason2formula(~-1+ri(type="iid",corr="all")+t, S=1, period=stsobj@freq))
+# c3b3 <- m3$control
+# c3b3$max_lag <- 3
+# c3b4 <- m3$control
+# c3b4$ar <- list(f=addSeason2formula(~-1+ri(type="iid",corr="all")+t, S=1, period=stsobj@freq))
 #[2,] 0.9897456 0.4549736 0.6855733 1.653120
 # z 
 # 0.0002544396 3.6577494163 
@@ -509,8 +502,9 @@ m4a3 <- profile_par_lag(stsobj,c4a3)
 m4b <- profile_par_lag(stsobj,c4b)
 m4b2 <- profile_par_lag(stsobj,c4b2)
 m4b3 <- profile_par_lag(stsobj,c4b3)
+tic()
 m4b4 <- profile_par_lag(stsobj,c4b4)
-
+toc()
 m4c <- profile_par_lag(stsobj,c4c)
 m4c2 <- profile_par_lag(stsobj,c4c2)
 m4c3 <- profile_par_lag(stsobj,c4c3)
@@ -744,6 +738,7 @@ permut.test(m5,m6,tp=test, type="first")
 
 
 selected.models <- list(m1,m2,m3,m4,m5,m6)
+model.assess.all <- modelassess(selected.models, test, type = "first")
 save(selected.models, file="./results/selected_models.RData")
 
 length(model.list1) #12
@@ -760,5 +755,12 @@ save(model.list.all, file="./results/all_models.Rdata")
 
 # Refit all models to just the training period (first four years of data)
 model.list.train <- lapply(model.list.all, update, subset=5:48)
+
+selected.train <- lapply(selected.models, update, subset=5:48)
 save(model.list.train, file="./results/all_models_trainper.Rdata")
+
+
+
+# -----------------------------------------------------------------------------
+
 

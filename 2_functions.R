@@ -44,15 +44,23 @@ random.model<-function(sts.object, n, tp=c(48,71)){
     NE.lag <- NE.lag.list[[rand.opt[6]]]
     fam <- fam.list[[rand.opt[7]]]
     
+    print(paste0("END = ",END.form,", offset = ",END.offset,", AR = ",AR.form,", lag = ",AR.lag,", NE = ",NE.form,", sp.lag = ",NE.lag,", family = ",fam))
     
-    # print(paste0("END = ",END.form,", offset = ",END.offset,", AR = ",AR.form,", lag = ",AR.lag,", NE = ",NE.form,", sp.lag = ",NE.lag,", family = ",fam))
-    
-    control <- list(end = list(f = END.form, offset=END.offset), 
-                    ar = list(f = AR.form),
-                    ne = list(f = NE.form, weights=W_powerlaw(maxlag = NE.lag)), #something wrong with this?
-                    subset=subset,
-                    max_lag=AR.lag,
-                    family = fam)
+    if (NE.lag == 1){
+      control <- list(end = list(f = END.form, offset=END.offset), 
+                      ar = list(f = AR.form),
+                      ne = list(f = NE.form, weights = neighbourhood(stsobj)==1), 
+                      subset=subset,
+                      max_lag=AR.lag,
+                      family = fam)
+    }else{
+      control <- list(end = list(f = END.form, offset=END.offset), 
+                      ar = list(f = AR.form),
+                      ne = list(f = NE.form, weights=W_powerlaw(maxlag = NE.lag, from0 = FALSE)),
+                      subset=subset,
+                      max_lag=AR.lag,
+                      family = fam)
+    }
     
     # Fit models with error catching since some combinations lead to convergence issues
     model <- tryCatch(profile_par_lag(sts.object, control=control), error = function(e) e, warning = function(w) w) #, finally = function(){ models <- list.append(models, model) })
@@ -91,9 +99,9 @@ comp.nblag<-function(model,tp,type,SCORES=c("logs", "rps", "dss", "ses")){
   model<-profile_par_lag(model$stsObj,ctl)
   
   osa.list<-list(oneStepAhead_hhh4lag(model, tp=tp, type = type, which.start = "current"))
-  scores_nblag[1,]<-colMeans(scores(osa.all[[1]],which=SCORES))
-  calibp_nblag[1]<-calibrationTest(osa.all[[1]], which="rps")[["p.value"]]
-  calibz_nblag[1]<-calibrationTest(osa.all[[1]], which="rps")[["statistic"]]
+  scores_nblag[1,]<-colMeans(scores(osa.list[[1]],which=SCORES))
+  calibp_nblag[1]<-calibrationTest(osa.list[[1]], which="rps")[["p.value"]]
+  calibz_nblag[1]<-calibrationTest(osa.list[[1]], which="rps")[["statistic"]]
   
   for (i in 2:7){
     
@@ -110,7 +118,7 @@ comp.nblag<-function(model,tp,type,SCORES=c("logs", "rps", "dss", "ses")){
   }
   
   results<-list(AIC_nblag,scores_nblag,calibp_nblag,calibz_nblag)  
-  return(list(osa.all,results))
+  return(list(osa.list,results))
 }
 
 # Comparison of temporal lags (determine maximum lag in time at which to fit 
@@ -196,7 +204,7 @@ modelassess <- function(model.list, time.period,type,SCORES=c("logs", "rps", "ds
   AIC <- sapply(model.list, AIC)
   model.preds <- lapply(model.list, oneStepAhead_hhh4lag, tp = time.period, 
                         type = type, which.start = "current", 
-                        keep.estimates=T)
+                        keep.estimates=T, refit_par_lag = T)
   all.scores <- lapply(model.preds, scores, which = SCORES, individual = T)
   all.calibr <- lapply(model.preds, calibrationTest, which = "rps", individual = T)
   model.scores <- t(sapply(all.scores, colMeans, dims=2))

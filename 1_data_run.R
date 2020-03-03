@@ -1,6 +1,6 @@
 # Author:         Emily S Nightingale
 # Institutions:   London Schoool of Hygiene and Tropical Medicine, London, UK
-# Date Published: October 2019
+# Date Published: February 2020
 ################################################################################
 # This script loads the data and sets up the necessary packages/objects for all 
 # subsequent analyses. 
@@ -50,10 +50,11 @@ setwd(data.path)
 map<-readOGR(dsn = "TAHSILS_CENSUS_2001", layer = "TAHSILS_CENSUS_2001")
 #VL region of interest
 VL<-map[map$state == "BIHAR"|
-           (map$state == "JHARKHAND" & (map$district == "DUMKA" & !(map$admin3 %in% c("Jamtara","Kundahit","Narayanpur_D","Nala"))|
-                                          (map$district %in% c("GODDA","PAKAUR","SAHIBGANJ")))),]
+           (map$state == "JHARKHAND" &
+              (map$district == "DUMKA" & !(map$admin3 %in% c("Jamtara","Kundahit","Narayanpur_D","Nala"))|
+              (map$district %in% c("GODDA","PAKAUR","SAHIBGANJ")))),]
 # Endemic region of Bihar and Jharkhand
-shp<-map[(map$state == "BIHAR" & !(map$district %in% c("GAYA","JAMUI","KAIMUR (BHABUA)","ROHTAS")))|
+shp<-map[(map$state == "BIHAR" & !(map$district %in% c("AURANGABAD_B","GAYA","JAMUI","KAIMUR (BHABUA)","ROHTAS")))| 
          (map$state == "JHARKHAND" & (map$district == "DUMKA" & !(map$admin3 %in% c("Jamtara","Kundahit","Narayanpur_D","Nala"))|
                                    (map$district %in% c("GODDA","PAKAUR","SAHIBGANJ")))),]
 shp@data$OBJECTID <- rownames(shp@data)
@@ -62,9 +63,10 @@ shp@data$OBJECTID <- rownames(shp@data)
 nbOrd <- nbOrder(poly2adjmat(shp), maxlag = 7)
 
 # Load input data (month-aggregated case counts for each block)
-load("input_sim.RData")
-input <- input_sim
-#load("./KAMIS/Analysis data/archive/input_jan13dec18_1406.RData")
+# load("input_sim.RData")
+# input <- input_sim
+load("./KAMIS/Analysis data/input_jan13dec19.RData")
+input <- filter(input, interval_start >= as.Date("2014-01-01"))
 
 # Run user-defined functions 
 source(paste0(script.path,"2_functions.R"))
@@ -72,7 +74,7 @@ source(paste0(script.path,"2_functions.R"))
 #-----------------------------------------------------------------------#
 
 # Remove four non-endemic districts and assume remaining missing numbers are 0 
-input2 <- input[!(input$District %in% c("GAYA","JAMUI","KAIMUR (BHABUA)","ROHTAS")),]
+input2 <- input[!(input$District %in% c("AURANGABAD","GAYA","JAMUI","KAIMUR (BHABUA)","ROHTAS")),] 
 input2$count[is.na(input2$count)] <- 0
 
 # Double check no observations outside region of interest
@@ -101,6 +103,7 @@ inc <- cases*1e4/pops
 
 # Using relative population sizes in surveillance makes computation easier
 # Observed time period:
+pop_c <- (pops - mean(pops))
 popfrac <- pops/rowSums(pops) 
 colnames(popfrac) <- rownames(shp@data)
 

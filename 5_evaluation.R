@@ -73,14 +73,14 @@ save(models.scores.first, file="scores_first.RData")
 save(models.scores.rolling, file="scores_rolling.RData")
 
 # Rearrange into a 4D array of each model's four scores for each block-month
-scores_rolling <- array(dim=c(length(models.scores.rolling), dim(models.scores.rolling[[1]])))
-for (i in 1:length(models.scores.rolling)){scores_rolling[i,,,] <- models.scores.rolling[[i]]}
 scores_first <- array(dim=c(length(models.scores.first), dim(models.scores.first[[1]])))
 for (i in 1:length(models.scores.first)){scores_first[i,,,] <- models.scores.first[[i]]}
+scores_rolling <- array(dim=c(length(models.scores.rolling), dim(models.scores.rolling[[1]])))
+for (i in 1:length(models.scores.rolling)){scores_rolling[i,,,] <- models.scores.rolling[[i]]}
 
 # Average each score over all blocks and months
-scores_rolling_avg <- apply(scores_rolling, MARGIN=c(1,4), FUN="mean")
 scores_first_avg <- apply(scores_first, MARGIN=c(1,4), FUN="mean")
+scores_rolling_avg <- apply(scores_rolling, MARGIN=c(1,4), FUN="mean")
 
 ## Calibration (based on RPS)
 calibr.first <- lapply(osa.final.first, calibrationTest, which = "rps", individual = T)
@@ -108,6 +108,23 @@ for(i in 1:nmod){
 C_all <- data.frame(C1090=C1090[,1], C1090_qwd=C1090[,2], C2575=C2575[,1],
                     C2575_qwd=C2575[,2], C4555=C4555[,1], C4555_qwd=C4555[,2])
 
+# MSE
+models.mse.first <- sapply(osa.final.first, FUN = function(x){mean((x$pred - x$observed)^2)})
+models.mse.rolling <- sapply(osa.final.rolling, FUN = function(x){mean((x$pred - x$observed)^2)})
+
+summary(models.mse.first)
+#  Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 1.498   1.603   1.655   1.851   1.883   3.875 
+summary(models.mse.rolling)  
+#  Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 1.493   1.604   1.646   1.847   1.870   3.743 
+
+models.mse.first[42]
+
+1-(models.mse.first[42]/models.mse.first[1]) # 0.5363314
+1-(models.mse.rolling[42]/models.mse.rolling[1]) # 0.5411541
+
+1-(models.mse.first[23]/models.mse.first[1]) # 0.4876999
 
 # ----------------------------- #
 #    Construct result tables    #
@@ -126,6 +143,7 @@ result_table$selected <- 0
 result_table$selected[result_table$Model%in%selected] <- 1
 result_table$stage <- stage
 save(result_table, file="result_table.Rdata")
+write.csv(result_table, file="result_table.csv", row.names = F)
 
 
 # ------ Selected model table ----- #

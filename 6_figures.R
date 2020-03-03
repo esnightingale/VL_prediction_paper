@@ -14,33 +14,34 @@ source("C:/Users/phpuenig/Documents/VL/VL_prediction_paper/plot_hhh4_amended.R")
 set.seed(101)
 SCORES <- c("logs", "rps", "dss", "ses")
 
-path <- "C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/Paper/results/"
+path <- "C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/Paper/results/evaluation/" #Update Feb 2020/
+path <- "C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/Paper/results/archive/Update 491 blocks/" #Update Feb 2020/
 load(paste0(path,"all_models.Rdata"))
-load(paste0(path,"./evaluation/osa_first.Rdata"))
-load(paste0(path,"./evaluation/osa_rolling.Rdata"))
-load(paste0(path,"./evaluation/scores_first.RData"))
-load(paste0(path,"./evaluation/scores_rolling.RData"))
-load(paste0(path,"./evaluation/quants.Rdata"))
-load(paste0(path,"./evaluation/coverage.RData"))
-load(paste0(path,"./evaluation/pred3_final.RData"))
-load(paste0(path,"./evaluation/pred4_final.RData"))
-load(paste0(path,"./evaluation/quants3_final.RData"))
-load(paste0(path,"./evaluation/quants4_final.RData"))
-load(paste0(path,"./evaluation/scores_mf_first.RData"))
-load(paste0(path,"./evaluation/scores_mf_rolling.RData"))
-load(paste0(path,"./evaluation/scores_3ahead_final.RData"))
-load(paste0(path,"./evaluation/scores_4ahead_final.RData"))
+load(paste0(path,"osa_first.Rdata")) #./evaluation/
+load(paste0(path,"osa_rolling.Rdata"))
+load(paste0(path,"scores_first.RData"))
+load(paste0(path,"scores_rolling.RData"))
+load(paste0(path,"quants.Rdata"))
+load(paste0(path,"coverage.RData"))
+load(paste0(path,"pred3_final.RData"))
+load(paste0(path,"pred4_final.RData"))
+load(paste0(path,"quants3_final.RData"))
+load(paste0(path,"quants4_final.RData"))
+load(paste0(path,"scores_mf_first.RData"))
+load(paste0(path,"scores_mf_rolling.RData"))
+load(paste0(path,"scores_3ahead_final.RData"))
+load(paste0(path,"scores_4ahead_final.RData"))
 
 load("C:/Users/phpuenig/Dropbox/VL/Monthly prediction/surveillance forecasting/exploratory/random model draw/result_table_randmods30.RData")
 results_random <- result_table
-load("C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/Paper/results/evaluation/result_table.Rdata")
+load("C:/Users/phpuenig/Dropbox/VL/Monthly Prediction/surveillance forecasting/Paper/results/archive/Update 491 blocks/result_table.Rdata")
 
-setwd("C:/Users/phpuenig/Dropbox/VL/Monthly prediction/surveillance forecasting/Paper/figures")
+setwd("C:/Users/phpuenig/Dropbox/VL/Monthly prediction/surveillance forecasting/Paper/Update Feb 2020/figures")
 
 #-----------------------DESCRIPTIVE-----------------------# 
 
-timeall <- format(seq(as.Date("2013-1-1"), by="month", length.out = 73), "%Y-%m-%d")
-yr <- seq(1,73,12)
+timeall <- format(seq(as.Date("2015-1-1"), by="month", length.out = 61), "%Y-%m-%d")
+yr <- seq(1,61,12)
 
 wide2 <- dcast(input, OBJECTID+State+District+Block~interval_start, value.var = "count")
 rownames(wide2) <- wide2$OBJECTID
@@ -48,39 +49,42 @@ pops2 <- dcast(input, OBJECTID+State+District+Block~interval_start, value.var = 
 rownames(pops2) <- pops2$OBJECTID
 cases2 <- t(wide2[,-1:-4])
 pops2 <- t(pops2[,-1:-4])
-inc18 <- data.frame(id=wide2$OBJECTID, value=colSums(cases2[61:72,])*1e4/colMeans(pops2[61:72,]))
+inc19 <- data.frame(id=wide2$OBJECTID, value=colSums(cases2[49:60,])*1e4/colMeans(pops2[49:60,]))
 
 # Block-level incidence per 10,000 in 2018
-#png(filename = "./png/Fig1.png", height = 400, width = 600)
-tiff(filename = "./tif/Fig1.tif", height = 5, width = 7, units = "in", res = 300)
-mapplot(shapefile=VL, data=inc18, legend_title="Cases per 10,000", value = value) +
-  ggtitle("Block-level incidence per 10,000 in 2018", )
-dev.off()
+# png(filename = "./png/Fig1.png", height = 400, width = 600)
+# tiff(filename = "./tif/Fig1.tif", height = 5, width = 7, units = "in", res = 300)
+mapplot(shapefile=VL, data=inc19, legend_title="Cases per 10,000", value = value) +
+  ggtitle("Block-level incidence per 10,000 in 2019", )
+# dev.off()
 
 # Average monthly incidence per 10,000 in 2018
-inc18mth <- data.frame(id=wide2$OBJECTID, value=colMeans(cases2[61:72,]*1e4/pops2[61:72,]))
-#png(filename = "./png/Fig1a.png", height = 400, width = 600)
-tiff(filename = "./tif/Fig1a.tif", height = 5, width = 7, units = "in", res = 300)
-mapplot(shapefile=VL, data=inc18mth, legend_title="Cases per 10,000", value = value) #+ 
-  #ggtitle("Block-level, average monthly incidence per 10,000 over 2018")
-dev.off()
+# inc19mth <- data.frame(id=wide2$OBJECTID, value=colMeans(cases2[49:60,]*1e4/pops2[49:60,]))
+# png(filename = "./png/Fig1a.png", height = 400, width = 600)
+# tiff(filename = "./tif/Fig1a.tif", height = 5, width = 7, units = "in", res = 300)
+# mapplot(shapefile=VL, data=inc19mth, legend_title="Cases per 10,000", value = value) + 
+#   ggtitle("Average monthly incidence per 10,000 over 2019")
+# dev.off()
 
 par(mfrow=c(1,1))
-#png(filename="./png/Fig2.png", height=300, width=400)
-tiff(filename="Fig2.tif",height=4,width=5, units = "in", res = 300)
+# png(filename="./png/Fig2.png", height=300, width=400)
+# tiff(filename="./tif/Fig2.tif",height=4,width=5, units = "in", res = 300)
 barplot(rowSums(cases), xaxt="n", xlab="", ylab="No. reported cases", space=0)
 axis(1, at=yr-1, labels=timeall[yr], las=2 , cex.axis=0.8)
-dev.off()
+# dev.off()
 
 blocktotal <- colSums(cases)
-#png(filename="./png/Fig2b.png", height=450, width=600)
-tiff(filename = "./tif/Fig2b.tif", height = 4.5, width = 6, units = "in", res = 300)
-hist(blocktotal, breaks=30, xlab="Total cases Jan 2013-Dec 2018", 
-     main="Block-level distribution of cases over whole time period (N = 502)")
-dev.off()
+# png(filename="./png/Fig2b.png", height=450, width=600)
+# tiff(filename = "./tif/Fig2b.tif", height = 4.5, width = 6, units = "in", res = 300)
+hist(blocktotal, breaks=30, xlab="Total cases Jan 2015-Dec 2019", 
+     main="Block-level distribution of cases over whole time period (N = 491)")
+# dev.off()
 
 
 #----------------- RANDOM MODEL ASSESSMENT ---------------------#
+
+load("C:/Users/phpuenig/Dropbox/VL/Monthly prediction/surveillance forecasting/exploratory/random model draw/result_table_randmods30.RData")
+results_random <- result_table
 
 fitvfirst <- ggplot(results_random,aes(AIC_train,rps.first, col=k)) +
   theme(legend.position = c(0.6,0.2)) +
@@ -99,9 +103,9 @@ firstvroll <- ggplot(results_random,aes(rps.first,rps.roll, col=k)) +
   scale_color_viridis_c(option = "C") 
 
 #png(filename = "./png/Fig3.png", height=400, width=800)
-tiff(filename = "./tif/Fig3.tif", height=5, width=10, units = "in", res=300)
+# tiff(filename = "./tif/Fig3.tif", height=5, width=10, units = "in", res=300)
 plot_grid(fitvfirst+geom_point(cex=3), firstvroll+geom_point(cex=3), labels=c("A", "B"), ncol = 2)
-dev.off()
+# dev.off()
 
 #----------------- SYSTEMATIC SELECTION ------------------------#
 
@@ -113,7 +117,7 @@ nmod <- nrow(result_table)
 
 palette(plasma(6))
 #png(filename = "./png/Fig4.png", width=600, height=500)
-tiff(filename = "./tif/Fig4.tif", height = 6.5, width = 7.5, units = "in", res = 300)
+# tiff(filename = "./tif/Fig4.tif", height = 6.5, width = 7.5, units = "in", res = 300)
 par(mfrow=c(2,2), mar=c(4,4,3,4))
 
 plot(c(1:nmod), result_table$rps, 
@@ -145,7 +149,7 @@ plot(c(1:nmod), result_table$C1090_qwd, xlim=c(1,nmod), axes=F, xlab=NA, ylab=NA
      type="l", lty="dashed", col="darkgrey")
 axis(side = 4)
 mtext(side = 4, line = 2, 'Average interval width')
-dev.off()
+# dev.off()
 
 # PIT histograms for selected models
 selected <- c(1,6,23,33,42,52)
