@@ -108,7 +108,6 @@ for(i in 1:nmod){
 C_all <- data.frame(C1090=C1090[,1], C1090_qwd=C1090[,2], C2575=C2575[,1],
                     C2575_qwd=C2575[,2], C4555=C4555[,1], C4555_qwd=C4555[,2])
 
-
 # ----------------------------- #
 #    Construct result tables    #
 # ----------------------------- #
@@ -136,7 +135,7 @@ write.csv(result_selected, file="result_table_selected.csv")
 
 
 # --------------------------------------------------- #
-#   Evaluate 3/4SA Predictions for final model only   #
+#   Final model only                                  #
 # --------------------------------------------------- #
 
 # Predicted distributions for each block and time point in test period
@@ -183,13 +182,26 @@ save(C.3ahd, file="C_3ahd.RData")
 save(C.4ahd, file="C_4ahd.RData")
 
 
+# Mean absolute error (from predicted medians)
+# OSA
+predmed <- predquants(osa.final.first[[f]],probs=0.5)
+MAE_osa <- mean(abs(predmed[[1]] - cases[49:72,]))
+MAE_osa #0.58
+# 3/4 SA
+predmed3 <- predquants(pred3.final,probs=0.5)
+predmed4 <- predquants(pred4.final,probs=0.5)
+MAE3 <- mean(abs(predmed3[[1]] - cases[51:72,]))
+MAE4 <- mean(abs(predmed4[[1]] - cases[52:72,]))
+MAE3 #0.61
+MAE4 #0.60
+
 # Compare RPS of predictions 1/3/4 steps ahead (OSA calculated from rolling and "first"/training fit)
-mean(models.scores.first[[42]][,,2]) # 0.4201441
-mean(models.scores.rolling[[42]][,,2]) # 0.4197563
+mean(models.scores.first[[f]][,,2]) # 0.4201441
+mean(models.scores.rolling[[f]][,,2]) # 0.4197563
 mean(scores_3ahead_avg) # 0.4413778
 mean(scores_4ahead_avg) # 0.438052
 
-permut.test2(models.scores.first[[42]][-c(1,2),,2],scores_final_3ahead)
+permut.test2(models.scores.first[[f]][-c(1,2),,2],scores_final_3ahead)
 # $`diffObs`
 # [1] -0.02444261
 # 
@@ -198,7 +210,7 @@ permut.test2(models.scores.first[[42]][-c(1,2),,2],scores_final_3ahead)
 # 
 # $pVal.t
 # [1] 1.722715e-19
-permut.test2(models.scores.first[[42]][-c(1:3),,2],scores_final_4ahead)
+permut.test2(models.scores.first[[f]][-c(1:3),,2],scores_final_4ahead)
 # $`diffObs`
 # [1] -0.0275056
 # 
