@@ -73,14 +73,14 @@ save(models.scores.first, file="scores_first.RData")
 save(models.scores.rolling, file="scores_rolling.RData")
 
 # Rearrange into a 4D array of each model's four scores for each block-month
-scores_rolling <- array(dim=c(length(models.scores.rolling), dim(models.scores.rolling[[1]])))
-for (i in 1:length(models.scores.rolling)){scores_rolling[i,,,] <- models.scores.rolling[[i]]}
 scores_first <- array(dim=c(length(models.scores.first), dim(models.scores.first[[1]])))
 for (i in 1:length(models.scores.first)){scores_first[i,,,] <- models.scores.first[[i]]}
+scores_rolling <- array(dim=c(length(models.scores.rolling), dim(models.scores.rolling[[1]])))
+for (i in 1:length(models.scores.rolling)){scores_rolling[i,,,] <- models.scores.rolling[[i]]}
 
 # Average each score over all blocks and months
-scores_rolling_avg <- apply(scores_rolling, MARGIN=c(1,4), FUN="mean")
 scores_first_avg <- apply(scores_first, MARGIN=c(1,4), FUN="mean")
+scores_rolling_avg <- apply(scores_rolling, MARGIN=c(1,4), FUN="mean")
 
 ## Calibration (based on RPS)
 calibr.first <- lapply(osa.final.first, calibrationTest, which = "rps", individual = T)
@@ -125,6 +125,7 @@ result_table$selected <- 0
 result_table$selected[result_table$Model%in%selected] <- 1
 result_table$stage <- stage
 save(result_table, file="result_table.Rdata")
+write.csv(result_table, file="result_table.csv", row.names = F)
 
 
 # ------ Selected model table ----- #
