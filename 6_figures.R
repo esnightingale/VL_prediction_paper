@@ -1,6 +1,6 @@
 # Author:         Emily S Nightingale
 # Institutions:   London Schoool of Hygiene and Tropical Medicine, London, UK
-# Date Published: XX July 2019
+# Date Published: October 2019
 ################################################################################
 # Produce figures in manuscript
 ################################################################################
