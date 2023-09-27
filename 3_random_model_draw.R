@@ -4,7 +4,7 @@ library(rlist)
 library(MASS)
 library(ggplot2)
 
-setwd("C:/Users/phpuenig/Dropbox/VL/Monthly prediction/surveillance forecasting/exploratory/random model draw")
+setwd("C:/Users/phpuenig/Dropbox/VL/Monthly prediction/surveillance forecasting/Paper/Update Feb 2020/exploratory")
 
 set.seed(101)
 SCORES <- c("logs", "rps", "dss", "ses")
